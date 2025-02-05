@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <title>FlaskBlog</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.min.js"></script>
+</head>
+
+<body>
+    <h1>SpinQuest Data Station</h1>
+    <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+
+    <script>
+        let xyValues = {{ data | tojson | safe }};
+
+        const ctx = document.getElementById('myChart');
+        const myChart = new Chart(ctx, {
+            type: "scatter",
+            data: {
+                datasets: [{
+                    pointRadius: 4,
+                    pointBackgroundColor: "rgb(0,0,255)",
+                    data: xyValues
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'bottom',
+                        ticks: { source: 'auto' }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            max: 5,
+                            stepSize: 0.5
+                        }
+                    }]
+                }
+            }
+        });
+
+        const socket = io('http://172.28.36.9:5000');
+        socket.on('update', function (data) {
+            myChart.data.datasets[0].data = data;
+            myChart.update();
+        });
+    </script>
+</body>
+
+</html>
